@@ -1,22 +1,16 @@
 -- make use of the module of MHR_Overlay
-local quest_status = require("MHR_Overlay.Game_Handler.quest_status");
+local quest_status = require("reticle.quest_status");
 quest_status.init_module();
-
--- make use of the module of mhrise-coavins-dps
-local STATE  = require 'mhrise-coavins-dps.state'
-STATE.SCENE_MANAGER_VIEW = sdk.call_native_func(sdk.get_native_singleton("via.SceneManager"), sdk.find_type_definition("via.SceneManager"), "get_MainView")
-local CORE   = require 'mhrise-coavins-dps.core'
+main_view = sdk.call_native_func(sdk.get_native_singleton("via.SceneManager"), sdk.find_type_definition("via.SceneManager"), "get_MainView")
 
 log.info("[reticle.lua] loaded")
 
 local cfg = json.load_file("reticle_settings.json")
 
-if not cfg then
-    cfg = {
-        enabled = true,
-        size = 1,
-    }
-end
+cfg = cfg or {}
+cfg.enabled = cfg.enabled or true
+cfg.size = cfg.size or 1
+cfg.color = cfg.color or 0xFFFFFF00
 
 re.on_config_save(
     function()
@@ -25,27 +19,12 @@ re.on_config_save(
 )
 
 function draw_reticle()
-    local should_draw = false
-    quest_status.update_is_online();
-    quest_status.update_is_result_screen();
-    
-    if quest_status.index < 2 then
-        quest_status.update_is_training_area();
-
-        if quest_status.is_training_area then
-            should_draw = true
-        end
-    elseif quest_status.is_result_screen then
-        should_draw = true
-    elseif quest_status.index == 2 then
-        should_draw = true
-    end
-
-    if should_draw then
-        CORE.readScreenDimensions()
-        local screen_w = STATE.SCREEN_W
-        local screen_h = STATE.SCREEN_H
-        draw.filled_rect(screen_w/2-cfg.size, screen_h/2-cfg.size, cfg.size*2, cfg.size*2, 0xFFFFFF00)
+    if quest_status.should_draw() then
+        local size = main_view:call("get_Size")
+        if not size then return end
+        local screen_w = size:get_field("w")
+        local screen_h = size:get_field("h")
+        draw.filled_circle((screen_w+1)/2, (screen_h+1)/2, cfg.size, cfg.color, 30)
     end
 end
 
@@ -64,6 +43,10 @@ re.on_draw_ui(
 
         changed, value = imgui.slider_int("Size", cfg.size, 1, 20)
         if changed then cfg.size = value end
+
+        changed, value = imgui.color_picker("Color", cfg.color, "color for reticle")
+        if changed then cfg.color = value end
+
         imgui.tree_pop()
     end
 )
