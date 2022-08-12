@@ -7,7 +7,7 @@ Draw a simple reticle during quest (even without aiming or weapon drawn).
 - Change settings in script generated UI, the supported settings are:
   - Enabled: whether the script functionality is enabled.
   - Size: Size of the reticle.
-  - Color: Color of the reticle. Change value of alpha channel to get transparent reticle.
+  - Color: Color of the reticle when weapon is off/on. Change value of alpha channel to get transparent reticle.
 
 ### Credits
 
