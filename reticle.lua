@@ -27,7 +27,10 @@ function draw_reticle()
         local screen_h = size:get_field("h")
         local player_manager = sdk.get_managed_singleton("snow.player.PlayerManager");
         local master_player = player_manager:call("findMasterPlayer");
-        local weapon_drawn = master_player:call("isWeaponOn")
+        local weapon_drawn = false;
+        if master_player then
+            weapon_drawn = master_player:call("isWeaponOn");
+        end
         if weapon_drawn then 
             draw.filled_circle((screen_w+1)/2, (screen_h+1)/2, cfg.size, cfg.color_weapon_on, 30)
         else
